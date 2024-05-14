@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/ubuntu-22.04"
+  config.vm.hostname = "VM2"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+  #config.vm.network "private_network", ip: "192.168.56.3", nic_type: "virtio", virtualbox__intnet: "keepcodingsergi"
+  #config.vm.network "private_network", ip: "192.168.56.3", nic_type: "virtio", :virtualbox__intnet => "keepcodingsergi"
+  config.vm.network "private_network", ip: "192.168.70.3"
+  
+  # Reenvío de puerto 9200
+  config.vm.network "forwarded_port", guest: 9200, host: 9200
+   
+  # Reenvío de puerto 5601
+  config.vm.network "forwarded_port", guest: 5601, host: 5601
+
+  #Script
+  config.vm.provision "shell", path: "script_sergi_VM2.sh"
+  
+  config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+    vb.cpus = 4
+    vb.memory = "8192"
+    file_to_disk = "additional_disk.vdi"
+    unless File.exist?(file_to_disk)
+        vb.customize ['createhd', '--filename', 'additional_disk.vdi', '--size', '1024']
+    end
+    vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', '1', '--device', '0', '--type', 'hdd', '--medium', 'additional_disk.vdi']
+  end
+end
